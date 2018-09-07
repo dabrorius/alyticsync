@@ -1,4 +1,4 @@
-.dabar2 {
+.bar {
   fill: steelblue;
 }
 
@@ -7,7 +7,7 @@
 }
 
 .axis text {
-  font: 10px sans-serif;
+  font: 30px sans-serif;
 }
 
 .axis path,

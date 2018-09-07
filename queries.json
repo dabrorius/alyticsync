@@ -1,9 +1,1 @@
-[
-  {
-    "fields": [
-      "${primary_category}",
-      "${primary_value}"
-    ],
-    "simple": true
-  }
-]
+[]
