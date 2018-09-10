@@ -54,20 +54,28 @@ function login() {
     input: process.stdin,
     output: process.stdout
   });
+
+  rl._writeToOutput = (stringToWrite) => {
+    if (!rl.stdoutMuted) {
+      rl.output.write(stringToWrite);
+    }
+  };
   
   rl.question('Username: ', (user_name) => {
     rl.question('Password: ', (password) => {
+      rl.stdoutMuted = false;
       axios.post('https://alytic.io/api/v2/account/login', {user_name, password})
       .then(function (response) {
         const token = response.data.token.access_token;
         fs.writeFile('.alyticstoken', `Bearer ${token}`, (e) => console.log(e));
-        console.log('Success! You are now logged in.')
+        console.log('\nSuccess! You are now logged in.')
       })
       .catch((error) => {
         console.log(error);
       })
       rl.close();
     });
+    rl.stdoutMuted = true;
   });  
 }
 
