@@ -1,3 +1,7 @@
+// Hide password when logging in
+// Add config file that contains deck and card id
+// Handle API errors better
+//
 const axios = require('axios');
 const fs = require('fs');
 const readline = require('readline');
@@ -5,8 +9,16 @@ const readline = require('readline');
 const command = process.argv[2];
 
 switch(command) {
+  case 'view': {
+    view();
+    break;
+  }
   case 'pull': {
     pull();
+    break;
+  }
+  case 'init': {
+    init();
     break;
   }
   case 'push': {
@@ -24,6 +36,26 @@ switch(command) {
   default: {
     console.log(`Unknown command '${command}'.`);
   }
+}
+
+function init() {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+  
+  rl.question('Deck id: ', (deckId) => {
+    rl.question('Card id: ', (cardId) => {
+      fs.writeFile('./.alyticscfg', JSON.stringify({deckId, cardId}, null, 2), (err) => console.log(err));
+      console.log('Configuration has been saved.');
+      rl.close();
+    });
+  });
+}
+
+function view() {
+  const {deckId, cardId} = getConfig();
+  console.log(`https://alytic.io/a/card/${deckId}/${cardId}/headless`);
 }
 
 // Ask for username and password
@@ -53,7 +85,9 @@ function login() {
 // Read the files from the server and write them locally
 function pull() {
   const authToken = getAuthToken();
-  axios.get('https://alytic.io/api/v2/decks/7569/cards/112207', {headers: {Authorization: authToken}})
+
+  const {deckId, cardId} = getConfig();
+  axios.get(`https://alytic.io/api/v2/decks/${deckId}/cards/${cardId}`, {headers: {Authorization: authToken}})
     .then(function (response) {
       const {graphic_script, css, queries} = response.data.overrides;
       fs.writeFile('./style.css', css, (err) => console.log(err));
@@ -69,7 +103,9 @@ function push() {
   const css = fs.readFileSync('./style.css', "utf-8", (err) => console.log(err));
   const graphic_script = fs.readFileSync('./script.js', "utf-8", (err) => console.log(err));
   const queries = JSON.parse(fs.readFileSync('./queries.json', "utf-8", (err) => console.log(err)));
-  axios.patch('https://alytic.io/api/v2/decks/7569/cards/112207', {overrides: {css, graphic_script, queries}}, {
+
+  const {deckId, cardId} = getConfig();
+  axios.patch(`https://alytic.io/api/v2/decks/${deckId}/cards/${cardId}`, {overrides: {css, graphic_script, queries}}, {
       headers: {Authorization: authToken, 'Content-Type': 'application/json'}
     })
     .then(function (response) {
@@ -95,6 +131,15 @@ function getAuthToken() {
     return fs.readFileSync('.alyticstoken', "utf-8");
   } catch {
     console.log('Please login first!');
+    process.exit(1);
+  }
+}
+
+function getConfig() {
+  try {
+    return JSON.parse(fs.readFileSync('.alyticscfg', "utf-8"));
+  } catch {
+    console.log('Deck and card ids are missing. Please run `init` command first.');
     process.exit(1);
   }
 }
