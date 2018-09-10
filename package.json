@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "Command line tool for editin Alytic.io cards",
   "main": "main.js",
+  "bin": {
+    "alyticsync": "./bin.js"
+  },
+  "preferGlobal": true,
   "dependencies": {
     "axios": "^0.18.0",
     "debug": "^3.1.0",
