@@ -17,6 +17,10 @@ switch(command) {
     login();
     break;
   }
+  case 'watch': {
+    watch();
+    break;
+  }
   default: {
     console.log(`Unknown command '${command}'.`);
   }
@@ -55,7 +59,7 @@ function pull() {
       fs.writeFile('./style.css', css, (err) => console.log(err));
       fs.writeFile('./script.js', graphic_script, (err) => console.log(err));
       fs.writeFile('./queries.json', JSON.stringify(queries, null, 2), (err) => console.log(err));
-      console.log(css);
+      console.log('Changes have been puled from alytic.io');
     });
 }
 
@@ -63,15 +67,27 @@ function pull() {
 function push() {
   const authToken = getAuthToken();
   const css = fs.readFileSync('./style.css', "utf-8", (err) => console.log(err));
-  axios.patch('https://alytic.io/api/v2/decks/7569/cards/112207', {overrides: {css}}, {
+  const graphic_script = fs.readFileSync('./script.js', "utf-8", (err) => console.log(err));
+  const queries = JSON.parse(fs.readFileSync('./queries.json', "utf-8", (err) => console.log(err)));
+  axios.patch('https://alytic.io/api/v2/decks/7569/cards/112207', {overrides: {css, graphic_script, queries}}, {
       headers: {Authorization: authToken, 'Content-Type': 'application/json'}
     })
     .then(function (response) {
-      console.log('Done!');
+      console.log('Changes have been pushed to alytic.io');
     })
     .catch(function (error) {
       console.log(error);
     });
+}
+
+function watch() {
+  const handleChange = () => {
+    console.log('Change detected...');
+    push();
+  }
+  fs.watchFile('./style.css', handleChange);
+  fs.watchFile('./script.js', handleChange);
+  fs.watchFile('./queries.json', handleChange);
 }
 
 function getAuthToken() {
