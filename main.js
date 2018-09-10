@@ -1,7 +1,3 @@
-// Hide password when logging in
-// Add config file that contains deck and card id
-// Handle API errors better
-//
 const axios = require('axios');
 const fs = require('fs');
 const readline = require('readline');
@@ -9,35 +5,20 @@ const readline = require('readline');
 const command = process.argv[2];
 
 switch(command) {
-  case 'view': {
-    view();
-    break;
-  }
-  case 'pull': {
-    pull();
-    break;
-  }
-  case 'init': {
-    init();
-    break;
-  }
-  case 'push': {
-    push();
-    break;
-  }
-  case 'login': {
-    login();
-    break;
-  }
-  case 'watch': {
-    watch();
-    break;
-  }
-  default: {
-    console.log(`Unknown command '${command}'.`);
-  }
+  case 'view': { view(); break; }
+  case 'pull': { pull(); break; }
+  case 'init': { init(); break; }
+  case 'push': { push(); break; }
+  case 'login': { login(); break; }
+  case 'watch': { watch(); break; }
+  default: { console.log(`Unknown command '${command}'.`); }
 }
 
+/**
+ * Ask user for Deck and Card id
+ * and save that information locally
+ * to a `.alyticscfg` file
+ */
 function init() {
   const rl = readline.createInterface({
     input: process.stdin,
@@ -53,13 +34,21 @@ function init() {
   });
 }
 
+/**
+ * Load the Deck and Card id
+ * from the `.alyticscfg` file
+ * and log the URL for viewing the card to the console
+ */
 function view() {
   const {deckId, cardId} = getConfig();
   console.log(`https://alytic.io/a/card/${deckId}/${cardId}/headless`);
 }
 
-// Ask for username and password
-// Get the token and write it to `.alyticstoken` file
+/**
+ * Ask for username and password
+ * get the authentication token from the API
+ * and write it to `.alyticstoken` file  
+ */
 function login() {
   const rl = readline.createInterface({
     input: process.stdin,
@@ -82,7 +71,11 @@ function login() {
   });  
 }
 
-// Read the files from the server and write them locally
+/**
+ * Fetch the current style, script and query
+ * from the API
+ * and write them to local files.
+ */
 function pull() {
   const authToken = getAuthToken();
 
@@ -97,7 +90,10 @@ function pull() {
     });
 }
 
-// Read local files and write them to server
+/**
+ * Read the local style, script and query files
+ * update the alytics.io database with its contents
+ */
 function push() {
   const authToken = getAuthToken();
   const css = fs.readFileSync('./style.css', "utf-8", (err) => console.log(err));
@@ -116,6 +112,10 @@ function push() {
     });
 }
 
+/**
+ * Watch style, script and query file for changes
+ * and trigger a `push` command when changes are detected
+ */
 function watch() {
   const handleChange = () => {
     console.log('Change detected...');
@@ -126,6 +126,9 @@ function watch() {
   fs.watchFile('./queries.json', handleChange);
 }
 
+/**
+ * Read auth token from local filesystem
+ */
 function getAuthToken() {
   try {
     return fs.readFileSync('.alyticstoken', "utf-8");
@@ -135,6 +138,9 @@ function getAuthToken() {
   }
 }
 
+/**
+ * Read alytic deck and card id from local filesystem
+ */
 function getConfig() {
   try {
     return JSON.parse(fs.readFileSync('.alyticscfg', "utf-8"));
