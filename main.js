@@ -5,11 +5,11 @@ const readline = require('readline');
 const command = process.argv[2];
 
 switch(command) {
+  case 'init': { init(); break; }
+  case 'login': { login(); break; }
   case 'view': { view(); break; }
   case 'pull': { pull(); break; }
-  case 'init': { init(); break; }
   case 'push': { push(); break; }
-  case 'login': { login(); break; }
   case 'watch': { watch(); break; }
   default: { console.log(`Unknown command '${command}'.`); }
 }
