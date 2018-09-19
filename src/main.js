@@ -2,6 +2,8 @@ const axios = require('axios');
 const fs = require('fs');
 const readline = require('readline');
 
+const pull = reqire('commands/pull.js');
+
 exports.execute = function () {
   const command = process.argv[2];
   switch(command) {
@@ -81,32 +83,30 @@ function login() {
 }
 
 /**
- * Fetch the current style, script and query
- * from the API
- * and write them to local files.
- */
-function pull() {
-  const authToken = getAuthToken();
-
-  const {deckId, cardId} = getConfig();
-  axios.get(`https://alytic.io/api/v2/decks/${deckId}/cards/${cardId}`, {headers: {Authorization: authToken}})
-    .then(function (response) {
-      const {graphic_script, css, queries} = response.data.overrides;
-      fs.writeFile('./style.css', css, (err) => console.log(err));
-      fs.writeFile('./script.js', graphic_script, (err) => console.log(err));
-      fs.writeFile('./queries.json', JSON.stringify(queries, null, 2), (err) => console.log(err));
-      console.log('Changes have been puled from alytic.io');
-    });
-}
-
-/**
  * Read the local style, script and query files
  * update the alytics.io database with its contents
  */
 function push() {
   const authToken = getAuthToken();
   const css = fs.readFileSync('./style.css', "utf-8", (err) => console.log(err));
-  const graphic_script = fs.readFileSync('./script.js', "utf-8", (err) => console.log(err));
+
+  let graphic_script = "";
+
+  if(fs.existsSync('.sourcefiles')) {
+    console.log("Has .sourcefile? YES!")
+    const sourceFilesBlock = fs.readFileSync('.sourcefiles', "utf-8");
+    const sourceFiles = sourceFilesBlock.replace(/\r\n/g, "\r").replace(/\n/g, "\r").split(/\r/);
+    console.log("Compiling script from: ", sourceFiles);
+    const sources = sourceFiles.map(filename => {
+      const comment = `//@sync[${filename}]\r\n`;
+      return comment + fs.readFileSync(filename, "utf-8");
+    })
+    graphic_script = sources.join("\n\r");
+  } else {
+    console.log("Has .sourcefile? no")
+    graphic_script = fs.readFileSync('./script.js', "utf-8", (err) => console.log(err));
+  }
+
   const queries = JSON.parse(fs.readFileSync('./queries.json', "utf-8", (err) => console.log(err)));
 
   const {deckId, cardId} = getConfig();

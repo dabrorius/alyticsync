@@ -1,3 +1,3 @@
 #!/usr/bin/env node
-const main = require('./main.js');
+const main = require('./src/main.js');
 main.execute();

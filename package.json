@@ -1,6 +1,6 @@
 {
   "name": "alyticsync",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Command line tool for editing of Alytic.io cards",
   "main": "main.js",
   "bin": {
@@ -14,9 +14,11 @@
     "is-buffer": "^1.1.6",
     "ms": "^2.0.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "jasmine": "^3.2.0"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jasmine -R spec src/**/*.test.js"
   },
   "author": "Filip Defar",
   "license": "none"
