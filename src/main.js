@@ -2,7 +2,7 @@ const axios = require("axios");
 const fs = require("fs");
 const readline = require("readline");
 
-const pull = reqire("commands/pull.js");
+const pull = require("./commands/pull/main.js");
 
 exports.execute = function() {
   const command = process.argv[2];
@@ -124,12 +124,8 @@ function push() {
   let graphic_script = "";
 
   if (fs.existsSync(".sourcefiles")) {
-    console.log("Has .sourcefile? YES!");
-    const sourceFilesBlock = fs.readFileSync(".sourcefiles", "utf-8");
-    const sourceFiles = sourceFilesBlock
-      .replace(/\r\n/g, "\r")
-      .replace(/\n/g, "\r")
-      .split(/\r/);
+    console.log("Has .sourcefiles? YES!");
+    const sourceFiles = getSourceFilesList();
     console.log("Compiling script from: ", sourceFiles);
     const sources = sourceFiles.map(filename => {
       const comment = `//@sync[${filename}]\r\n`;
@@ -176,9 +172,19 @@ function watch() {
     console.log("Change detected...");
     push();
   };
-  fs.watchFile("./style.css", handleChange);
-  fs.watchFile("./script.js", handleChange);
-  fs.watchFile("./queries.json", handleChange);
+  let filesToWatch = ["./queries.json", "./style.css"];
+  if (fs.existsSync(".sourcefiles")) {
+    console.log("Has .sourcefile? YES!");
+    filesToWatch = filesToWatch.concat(getSourceFilesList());
+  } else {
+    console.log("Has .sourcefiles? no");
+    filesToWatch.push("./script.js");
+  }
+
+  console.log("Started watching...");
+  console.log(filesToWatch);
+
+  filesToWatch.forEach(file => fs.watchFile(file, handleChange));
 }
 
 /**
@@ -205,4 +211,17 @@ function getConfig() {
     );
     process.exit(1);
   }
+}
+
+/**
+ * Reads a list of source files from .sourcefiles
+ * and returns it as an array of strings
+ */
+function getSourceFilesList() {
+  const sourceFilesBlock = fs.readFileSync(".sourcefiles", "utf-8");
+  const sourceFiles = sourceFilesBlock
+    .replace(/\r\n/g, "\r")
+    .replace(/\n/g, "\r")
+    .split(/\r/);
+  return sourceFiles;
 }
