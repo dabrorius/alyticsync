@@ -2,13 +2,20 @@ const axios = require("axios");
 const fs = require("fs");
 const readline = require("readline");
 
+const init = require("./commands/init/main.js");
 const pull = require("./commands/pull/main.js");
+
+const configurationPath = "./asconfig.json";
 
 exports.execute = function() {
   const command = process.argv[2];
   switch (command) {
     case "init": {
-      init();
+      const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+      });
+      init(rl.question, rl.close, storeConfig, console.log);
       break;
     }
     case "login": {
@@ -42,30 +49,6 @@ exports.execute = function() {
     }
   }
 };
-
-/**
- * Ask user for Deck and Card id
- * and save that information locally
- * to a `.alyticscfg` file
- */
-function init() {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-  });
-
-  rl.question("Deck id: ", deckId => {
-    rl.question("Card id: ", cardId => {
-      fs.writeFile(
-        "./.alyticscfg",
-        JSON.stringify({ deckId, cardId }, null, 2),
-        err => console.log(err)
-      );
-      console.log("Configuration has been saved.");
-      rl.close();
-    });
-  });
-}
 
 /**
  * Load the Deck and Card id
@@ -197,6 +180,17 @@ function getAuthToken() {
     console.log("Please login first!");
     process.exit(1);
   }
+}
+
+function storeConfig(content) {
+  let config = {};
+  if (fs.existsSync(configurationPath)) {
+    config = JSON.parse(fs.readFileSync(configurationPath, "utf-8"));
+  }
+  config = Object.assign(config, content);
+  fs.writeFileSync(configurationPath, JSON.stringify(config, null, 2), err =>
+    console.log(err)
+  );
 }
 
 /**
