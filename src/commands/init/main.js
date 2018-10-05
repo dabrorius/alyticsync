@@ -2,12 +2,12 @@
  * Ask user for Deck and Card id
  * and save that information locally
  */
-function init(ask, done, storeConfig, log) {
-  ask("Deck id: ", deckId => {
-    ask("Card id: ", cardId => {
-      storeConfig({ deckId, cardId, scripts: ["./script.js"] });
+function init(readLine, storeConfig, log) {
+  readLine.question("Deck id: ", deckId => {
+    readLine.question("Card id: ", cardId => {
+      storeConfig({ deckId, cardId, scripts: [] });
       log("Deck and Card IDs have been stored.");
-      done();
+      readLine.close();
     });
   });
 }

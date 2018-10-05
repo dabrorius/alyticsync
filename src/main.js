@@ -15,7 +15,7 @@ exports.execute = function() {
         input: process.stdin,
         output: process.stdout
       });
-      init(rl.question, rl.close, storeConfig, console.log);
+      init(rl, storeConfig, console.log);
       break;
     }
     case "login": {
@@ -33,7 +33,7 @@ exports.execute = function() {
         `https://alytic.io/api/v2/decks/${deckId}/cards/${cardId}`,
         { headers: { Authorization: authToken } }
       );
-      pull(fetchPromise, fs.writeFile, console.log);
+      pull(fetchPromise, fs.writeFile, storeConfig, console.log);
       break;
     }
     case "push": {
@@ -155,15 +155,8 @@ function watch() {
     console.log("Change detected...");
     push();
   };
-  let filesToWatch = ["./queries.json", "./style.css"];
-  if (fs.existsSync(".sourcefiles")) {
-    console.log("Has .sourcefile? YES!");
-    filesToWatch = filesToWatch.concat(getSourceFilesList());
-  } else {
-    console.log("Has .sourcefiles? no");
-    filesToWatch.push("./script.js");
-  }
-
+  const config = getConfig();
+  let filesToWatch = ["./queries.json", "./style.css"].concate(config.scripts);
   console.log("Started watching...");
   console.log(filesToWatch);
 
@@ -198,7 +191,7 @@ function storeConfig(content) {
  */
 function getConfig() {
   try {
-    return JSON.parse(fs.readFileSync(".alyticscfg", "utf-8"));
+    return JSON.parse(fs.readFileSync(configurationPath, "utf-8"));
   } catch {
     console.log(
       "Deck and card ids are missing. Please run `init` command first."
@@ -211,11 +204,11 @@ function getConfig() {
  * Reads a list of source files from .sourcefiles
  * and returns it as an array of strings
  */
-function getSourceFilesList() {
-  const sourceFilesBlock = fs.readFileSync(".sourcefiles", "utf-8");
-  const sourceFiles = sourceFilesBlock
-    .replace(/\r\n/g, "\r")
-    .replace(/\n/g, "\r")
-    .split(/\r/);
-  return sourceFiles;
-}
+// function getSourceFilesList() {
+//   const sourceFilesBlock = fs.readFileSync(".sourcefiles", "utf-8");
+//   const sourceFiles = sourceFilesBlock
+//     .replace(/\r\n/g, "\r")
+//     .replace(/\n/g, "\r")
+//     .split(/\r/);
+//   return sourceFiles;
+// }
