@@ -15,8 +15,9 @@ describe("Pulling scripts from remote server", function() {
     });
     const writeFileSpy = jasmine.createSpy("Write File Spy");
     const logSpy = jasmine.createSpy("Logging");
+    const storeConfigSpy = jasmine.createSpy("Store config spy");
 
-    pull(fetchPromise, writeFileSpy, logSpy);
+    pull(fetchPromise, writeFileSpy, storeConfigSpy, logSpy);
 
     fetchPromise.then(function() {
       expect(writeFileSpy).toHaveBeenCalledWith(
@@ -34,6 +35,7 @@ describe("Pulling scripts from remote server", function() {
         '"Queries content"',
         jasmine.any(Function)
       );
+      expect(storeConfigSpy).toHaveBeenCalledWith({ scripts: ["script.js"] });
       expect(logSpy).toHaveBeenCalledWith(
         "Changes have been puled from alytic.io"
       );
