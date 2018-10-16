@@ -1,6 +1,6 @@
 {
   "name": "alyticsync",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Command line tool for editing of Alytic.io cards",
   "main": "main.js",
   "bin": {
