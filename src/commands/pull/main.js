@@ -1,4 +1,5 @@
 const splitScript = require("./splitScript.js");
+const ensureDirectoryExistence = require("./ensureDirectoryExistence.js");
 
 /**
  * Fetch the current style, script and query
@@ -13,7 +14,9 @@ function pull(fetchPromise, writeFile, storeConfig, log) {
       writeFile("./style.css", css, errorHandler);
       const scripts = splitScript(graphic_script);
       scripts.forEach(script => {
-        writeFile(`./${script.file}`, script.content, errorHandler);
+        const filePath = `./${script.file}`;
+        ensureDirectoryExistence(filePath);
+        writeFile(filePath, script.content, errorHandler);
       });
       storeConfig({ scripts: scripts.map(s => s.file) });
       writeFile(
