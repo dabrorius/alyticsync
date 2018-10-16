@@ -1,5 +1,6 @@
 const splitScript = require("./splitScript.js");
 const ensureDirectoryExistence = require("./ensureDirectoryExistence.js");
+const errorHandler = require("../../errorHandler.js");
 
 /**
  * Fetch the current style, script and query
@@ -7,10 +8,14 @@ const ensureDirectoryExistence = require("./ensureDirectoryExistence.js");
  * and write them to local files.
  */
 function pull(fetchPromise, writeFile, storeConfig, log) {
-  const errorHandler = err => console.log(err);
   fetchPromise
     .then(function(response) {
-      const { graphic_script, css, queries } = response.data.overrides;
+      const { overrides, template } = response.data;
+      const templateWasOverriden =
+        overrides && Object.keys(overrides).length > 0;
+      const { graphic_script, css, queries } = templateWasOverriden
+        ? overrides
+        : template;
       writeFile("./style.css", css, errorHandler);
       const scripts = splitScript(graphic_script);
       scripts.forEach(script => {
@@ -26,7 +31,7 @@ function pull(fetchPromise, writeFile, storeConfig, log) {
       );
       log("Changes have been puled from alytic.io");
     })
-    .catch(err => console.log(err));
+    .catch(errorHandler);
 }
 
 module.exports = pull;
