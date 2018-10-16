@@ -106,21 +106,15 @@ function push() {
 
   let graphic_script = "";
 
-  if (fs.existsSync(".sourcefiles")) {
-    console.log("Has .sourcefiles? YES!");
-    const sourceFiles = getSourceFilesList();
-    console.log("Compiling script from: ", sourceFiles);
-    const sources = sourceFiles.map(filename => {
-      const comment = `//@sync[${filename}]\r\n`;
-      return comment + fs.readFileSync(filename, "utf-8");
-    });
-    graphic_script = sources.join("\n\r");
-  } else {
-    console.log("Has .sourcefile? no");
-    graphic_script = fs.readFileSync("./script.js", "utf-8", err =>
-      console.log(err)
-    );
-  }
+  const config = getConfig();
+
+  const sourceFiles = config.scripts;
+  console.log("Compiling script from: ", sourceFiles);
+  const sources = sourceFiles.map(filename => {
+    const comment = `//@sync[${filename}]\r\n`;
+    return comment + fs.readFileSync(filename, "utf-8");
+  });
+  graphic_script = sources.join("\n\r");
 
   const queries = JSON.parse(
     fs.readFileSync("./queries.json", "utf-8", err => console.log(err))
@@ -156,11 +150,12 @@ function watch() {
     push();
   };
   const config = getConfig();
-  let filesToWatch = ["./queries.json", "./style.css"].concate(config.scripts);
+  let filesToWatch = ["./queries.json", "./style.css"].concat(config.scripts);
   console.log("Started watching...");
   console.log(filesToWatch);
 
   filesToWatch.forEach(file => fs.watchFile(file, handleChange));
+  push();
 }
 
 /**
