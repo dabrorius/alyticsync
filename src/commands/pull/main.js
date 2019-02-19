@@ -7,8 +7,12 @@ const errorHandler = require("../../errorHandler.js");
  * from the API
  * and write them to local files.
  */
-function pull(fetchPromise, writeFile, storeConfig, log) {
-  fetchPromise
+function pull(authToken, httpClient, writeFile, config, storeConfig, log) {
+  const { deckId, cardId } = config;
+  httpClient
+    .get(`https://alytic.io/api/v2/decks/${deckId}/cards/${cardId}`, {
+      headers: { Authorization: authToken }
+    })
     .then(function(response) {
       const { overrides, template } = response.data;
       const templateWasOverriden =

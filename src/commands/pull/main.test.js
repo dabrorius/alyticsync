@@ -13,11 +13,15 @@ describe("Pulling scripts from remote server", function() {
         }
       });
     });
+    const httpClientStub = {
+      get: () => fetchPromise
+    };
     const writeFileSpy = jasmine.createSpy("Write File Spy");
     const logSpy = jasmine.createSpy("Logging");
     const storeConfigSpy = jasmine.createSpy("Store config spy");
+    const config = { deckId: 1, cardId: 1 };
 
-    pull(fetchPromise, writeFileSpy, storeConfigSpy, logSpy);
+    pull("token", httpClientStub, writeFileSpy, config, storeConfigSpy, logSpy);
 
     fetchPromise.then(function() {
       expect(writeFileSpy).toHaveBeenCalledWith(
