@@ -1,10 +1,11 @@
 {
   "name": "alyticsync",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Command line tool for editing of Alytic.io cards",
   "main": "main.js",
   "bin": {
-    "alyticsync": "./bin.js"
+    "alyticsync": "./bin.js",
+    "alytic": "./bin.js"
   },
   "preferGlobal": true,
   "dependencies": {
